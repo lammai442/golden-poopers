@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import logger from './middlewares/logger.js';
 import errorHandler from './middlewares/errorHandler.js';
+import menuRouter from './routes/menu.js';
+import authRouter from './routes/auth.js';
 
 // Config
 dotenv.config(); // Gör så att man kommer åt allt i env-filen
@@ -16,6 +18,11 @@ app.use(express.json());
 app.use(logger);
 
 // Routes
+// app.use('/api/carts');
+app.use('/api/auth', authRouter);
+// app.use('/api/keys');
+// app.use('/api/users');
+app.use('/api/menu', menuRouter);
 
 // En lyssnare för t ex uppkoppling mot databasen
 database.on('error', (error) => console.log(error));
