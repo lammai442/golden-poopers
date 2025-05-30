@@ -36,22 +36,37 @@ router.post('/register', async (req, res, next) => {
 });
 
 // POST - Login
-router.get('/login', validateAuthBody, async (req, res, next) => {
-	const { username, password } = req.body;
+router.post('/login', validateAuthBody, async (req, res, next) => {
+	try {
+		const user = await doesUsernameExists(req.body.username);
+		if (!user)
+			return next({
+				status: 400,
+				message: 'No user with that name found',
+			});
 
-	let exists = null;
-	if (username && password) {
-		exists = await doesUsernameExists(username);
+		if (user.password !== req.body.password)
+			return next({
+				status: 400,
+				message: 'Username or password are incorrect',
+			});
+
+		global.user = user;
+		res.json({
+			success: true,
+			message: 'User logged in successfully',
+		});
+	} catch (error) {
+		next(error);
 	}
-	res.json({
-		success: true,
-		user: exists,
-	});
 });
 
 // GET - Logout
-router.get('/logout', (req, res, next) => {
+router.get('/logout', (req, res) => {
 	global.user = null;
+	res.json({
+		success: true,
+		message: 'User logged out successfully',
+	});
 });
-
 export default router;
