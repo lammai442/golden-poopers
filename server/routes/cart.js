@@ -1,18 +1,21 @@
 import { Router } from 'express';
+import { getCartById } from '../services/cart.js';
 
 const router = Router();
 
-// GET cart by user
-router.get('/:userid', async (req, res, next) => {
-	// Hämtad exempel från todos
-	// try {
-	// 	const todos = await Todo.find({ userId: req.params.userid });
-	// 	res.json({ todos, success: true });
-	// } catch (err) {
-	// 	next(err);
-	// }
-});
+router.get('/:cartId', async (req, res, next) => {
+	try {
+		const { cartId } = req.params;
+		const cart = await getCartById(cartId);
 
-// PUT
+		if (!cart) {
+			return res.status(404).json({ success: false, message: 'Cart not found' });
+		}
+
+		res.json({ success: true, cart });
+	} catch (err) {
+		next(err);
+	}
+});
 
 export default router;
