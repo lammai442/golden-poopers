@@ -16,3 +16,21 @@ export function validateAuthBody(req, res, next) {
 		});
 	}
 }
+
+export function validatePutProductBody(req, res, next) {
+	if (req.body) {
+		const { prodId, qty } = req.body;
+		if (prodId && qty) next();
+		else {
+			res.status(400).json({
+				success: false,
+				message: 'You have to include both productID and quantity',
+			});
+		}
+	} else {
+		res.status(400).json({
+			success: false,
+			message: 'No body found in request',
+		});
+	}
+}
