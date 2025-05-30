@@ -13,4 +13,6 @@ router.get('/:userid', async (req, res, next) => {
 	// }
 });
 
+// PUT
+
 export default router;
