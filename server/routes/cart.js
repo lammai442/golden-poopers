@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { getCartById } from '../services/cart.js';
+import { getProductFromMenu } from '../services/products.js';
 
 const router = Router();
 
@@ -9,7 +10,9 @@ router.get('/:cartId', async (req, res, next) => {
 		const cart = await getCartById(cartId);
 
 		if (!cart) {
-			return res.status(404).json({ success: false, message: 'Cart not found' });
+			return res
+				.status(404)
+				.json({ success: false, message: 'Cart not found' });
 		}
 
 		res.json({ success: true, cart });
@@ -17,5 +20,7 @@ router.get('/:cartId', async (req, res, next) => {
 		next(err);
 	}
 });
+
+// PUT
 
 export default router;
