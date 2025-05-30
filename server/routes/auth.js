@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import User from '../models/user.js';
 import { doesUsernameExists } from '../services/users.js';
+import { validateAuthBody } from '../middlewares/validators.js';
 
 const router = Router();
 
@@ -35,7 +36,7 @@ router.post('/register', async (req, res, next) => {
 });
 
 // POST - Login
-router.get('/login', async (req, res, next) => {
+router.get('/login', validateAuthBody, async (req, res, next) => {
 	const { username, password } = req.body;
 
 	let exists = null;
