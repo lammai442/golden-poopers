@@ -2,6 +2,9 @@ import { Router } from 'express';
 import User from '../models/user.js';
 import { doesUsernameExists } from '../services/users.js';
 import { validateAuthBody } from '../middlewares/validators.js';
+import { v4 as uuid } from 'uuid';
+import Key from '../models/key.js';
+import { authorizeKey } from '../middlewares/authorize.js';
 
 const router = Router();
 
@@ -22,10 +25,18 @@ router.post('/register', async (req, res, next) => {
 				.status(400)
 				.json({ message: 'User already exists', success: false });
 
+		// Skapande och sparande av ny apiKey till databasen
+		const newApiKey = 'key-' + uuid().slice(0, 5);
+		const key = new Key({
+			key: newApiKey,
+		});
+		await key.save();
+
 		const user = new User({
 			username: username,
 			password: password,
 			role: 'User',
+			key: newApiKey,
 		});
 		await user.save();
 
@@ -35,8 +46,8 @@ router.post('/register', async (req, res, next) => {
 	}
 });
 
-// POST - Login
-router.post('/login', validateAuthBody, async (req, res, next) => {
+// GET - Login
+router.get('/login', authorizeKey, validateAuthBody, async (req, res, next) => {
 	try {
 		const user = await doesUsernameExists(req.body.username);
 		if (!user)
