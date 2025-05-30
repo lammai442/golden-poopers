@@ -22,13 +22,15 @@ router.post('/register', async (req, res, next) => {
 		const exists = await User.findOne({ username });
 		if (exists)
 			return res
-				.status(400)
-				.json({ message: 'User already exists', success: false });
+				.status(400).json({ 
+					message: 'User already exists', 
+					success: false 
+				});
 
-		// Skapande och sparande av ny apiKey till databasen
-		const newApiKey = 'key-' + uuid().slice(0, 5);
-		const key = new Key({
-			key: newApiKey,
+			// Skapande och sparande av ny apiKey till databasen
+			const newApiKey = 'key-' + uuid().slice(0, 5);
+			const key = new Key({
+				key: newApiKey,
 		});
 		await key.save();
 
@@ -40,20 +42,25 @@ router.post('/register', async (req, res, next) => {
 		});
 		await user.save();
 
-		res.status(201).json({ message: 'User registered', success: true });
+		res.status(201).json({ 
+			message: 'User registered',
+			success: true,  
+			key : newApiKey, 
+		});
 	} catch (err) {
 		next(err);
 	}
 });
 
 // GET - Login
-router.get('/login', authorizeKey, validateAuthBody, async (req, res, next) => {
+router.get('/login', validateAuthBody, async (req, res, next) => {
 	try {
 		const user = await doesUsernameExists(req.body.username);
 		if (!user)
 			return next({
 				status: 400,
 				message: 'No user with that name found',
+				success: false,
 			});
 
 		if (user.password !== req.body.password)
@@ -64,8 +71,9 @@ router.get('/login', authorizeKey, validateAuthBody, async (req, res, next) => {
 
 		global.user = user;
 		res.json({
-			success: true,
 			message: 'User logged in successfully',
+			success: true,
+			key : user.key,
 		});
 	} catch (error) {
 		next(error);
@@ -76,8 +84,8 @@ router.get('/login', authorizeKey, validateAuthBody, async (req, res, next) => {
 router.get('/logout', (req, res) => {
 	global.user = null;
 	res.json({
-		success: true,
 		message: 'User logged out successfully',
+		success: true,
 	});
 });
 export default router;
