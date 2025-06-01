@@ -6,7 +6,7 @@ export const getCartById = async (cartId) => {
 
 export async function updateCart(userId, product) {
 	try {
-		const cart = await getCartById(userId);
+		let cart = await getCartById(userId);
 		if (!cart) {
 			cart = await Cart.create({
 				cartId: userId,

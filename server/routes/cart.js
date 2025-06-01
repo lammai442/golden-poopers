@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { getCartById, updateCart } from '../services/cart.js';
 import { getProductFromMenu } from '../services/products.js';
 import { validatePutProductBody } from '../middlewares/validators.js';
+import { v4 as uuid } from 'uuid';
 
 const router = Router();
 
@@ -22,36 +23,42 @@ router.get('/:cartId', async (req, res, next) => {
 	}
 });
 
-// PUT a product to Cart
+// Lägg till en produkt i kundvagnen
 router.put('/', validatePutProductBody, async (req, res, next) => {
-	if (global.user) {
-		const { prodId, qty } = req.body;
-		try {
-			const product = await getProductFromMenu(prodId);
+	const { prodId, qty, guestId } = req.body;
+	try {
+		const product = await getProductFromMenu(prodId);
 
-			if (!product) {
-				const error = new Error(`Product not found`);
-				error.status = 404;
-				return next(error);
-			}
-			let result = await updateCart(global.user.userId, {
-				prodId: product.prodId,
-				title: product.title,
-				price: product.price,
-				qty: qty,
+		if (!product) {
+			return next({
+				status: 404,
+				message: 'Product not found',
 			});
+		}
 
-			res.json({
-				success: true,
-				cart: result,
-			});
-		} catch (error) {}
-	} else {
-		next({
-			status: 400,
-			success: false,
-			message: 'Not logged in',
+		let userId;
+
+		if (global.user && global.user.userId) {
+			userId = global.user.userId;
+		} else if (guestId) {
+			userId = guestId;
+		} else {
+			userId = 'guest-' + uuid().slice(0, 5);
+		}
+
+		let result = await updateCart(userId, {
+			prodId: product.prodId,
+			title: product.title,
+			price: product.price,
+			qty: qty,
 		});
+
+		res.json({
+			success: true,
+			cart: result,
+		});
+	} catch (error) {
+		next(error);
 	}
 });
 
