@@ -32,12 +32,13 @@ router.put('/', validatePutProductBody, async (req, res, next) => {
 		if (!product) {
 			return next({
 				status: 404,
-				message: 'Product not found',
+				message: 'Incorrect input of prodId, product not found',
 			});
 		}
 
 		let userId;
 
+		// Kontroll för inloggad annars guestId
 		if (global.user && global.user.userId) {
 			userId = global.user.userId;
 		} else if (guestId) {
@@ -56,13 +57,14 @@ router.put('/', validatePutProductBody, async (req, res, next) => {
 		res.json({
 			success: true,
 			cart: result,
+			userId: userId,
 		});
 	} catch (error) {
 		next(error);
 	}
 });
 
-//Ta bort en produkt ur kundvagnen
+// Ta bort en produkt ur kundvagnen
 router.put(`/cartId/item/:prodId/decrease`, async (req, res, next) => {
 	const { cartId, prodId } = req.params;
 
