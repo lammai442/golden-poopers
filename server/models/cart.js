@@ -9,12 +9,15 @@ const cartItemSchema = new Schema({
 	qty: Number,
 });
 
-const cartSchema = new Schema({
-	cartId: {
-		type: String,
+const cartSchema = new Schema(
+	{
+		cartId: {
+			type: String,
+		},
+		items: [cartItemSchema],
 	},
-	items: [cartItemSchema],
-});
+	{ timestamps: true }
+);
 
 const Cart = mongoose.model('Cart', cartSchema);
 
