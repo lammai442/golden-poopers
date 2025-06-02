@@ -21,8 +21,6 @@ app.use(logger);
 // Routes
 app.use('/api/cart', cartRouter);
 app.use('/api/auth', authRouter);
-// app.use('/api/keys');
-// app.use('/api/users');
 app.use('/api/menu', menuRouter);
 
 // En lyssnare för t ex uppkoppling mot databasen
