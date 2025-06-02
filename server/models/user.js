@@ -25,12 +25,6 @@ const userSchema = new Schema(
 			type: String,
 			required: true,
 		},
-		key: {
-			type: String,
-			required: true,
-			unique: true,
-			// default: () => 'key-' + uuid().slice(0, 5),
-		},
 	},
 	{ timestamps: true }
 );

@@ -7,9 +7,17 @@ const router = Router();
 router.get('/', async (req, res, next) => {
 	try {
 		const menus = await Menu.find();
+
+		if (!menus) {
+			return next({
+				status: 404,
+				message: 'Menus not found',
+			});
+		}
+
 		res.json({
-			menus,
 			success: true,
+			menus,
 		});
 	} catch (err) {
 		next(err);
