@@ -27,6 +27,12 @@ export async function updateCart(userId, product) {
 			cart.items = cart.items.filter((i) => i.prodId !== product.prodId);
 		}
 
+		// Om items är tom ska hela carten tas bort
+		if (cart.items.length === 0) {
+			await Cart.findOneAndDelete({ cartId: userId });
+			return null;
+		}
+
 		await cart.save();
 		return cart;
 	} catch (error) {

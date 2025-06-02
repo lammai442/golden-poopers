@@ -3,6 +3,7 @@ import { getCartById, updateCart } from '../services/cart.js';
 import { getProductFromMenu } from '../services/products.js';
 import { validatePutProductBody } from '../middlewares/validators.js';
 import { v4 as uuid } from 'uuid';
+import Cart from '../models/cart.js';
 
 const router = Router();
 
@@ -53,6 +54,10 @@ router.put('/', validatePutProductBody, async (req, res, next) => {
 			price: product.price,
 			qty: qty,
 		});
+
+		if (!result) {
+			result = 'Your cart is empty and deleted';
+		}
 
 		res.json({
 			success: true,
