@@ -6,11 +6,13 @@ import errorHandler from './middlewares/errorHandler.js';
 import menuRouter from './routes/menu.js';
 import authRouter from './routes/auth.js';
 import cartRouter from './routes/cart.js';
-
+import ordersRouter from './routes/orders.js';
 // Config
-dotenv.config();
+dotenv.config(); // Gör så att man kommer åt allt i env-filen
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT; // Istället för 8080 så refereras det till .env-filens PORT
+global.user = null;
+
 mongoose.connect(process.env.CONNECTION_STRING);
 const database = mongoose.connection;
 
@@ -21,12 +23,15 @@ app.use(logger);
 // Routes
 app.use('/api/cart', cartRouter);
 app.use('/api/auth', authRouter);
+// app.use('/api/keys');
+// app.use('/api/users');
 app.use('/api/menu', menuRouter);
-
+app.use('/api/orders', ordersRouter);
 // En lyssnare för t ex uppkoppling mot databasen
 database.on('error', (error) => console.log(error));
 database.once('connected', () => {
 	console.log('DB Connected');
+	// Flyttar in nedangående kod så att den endast körs när allt är uppladdad med servern
 	app.listen(PORT, () => {
 		console.log(`Server is running on ${PORT}`);
 	});

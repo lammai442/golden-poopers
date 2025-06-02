@@ -4,8 +4,17 @@ import { getProductFromMenu } from '../services/products.js';
 import { validatePutProductBody } from '../middlewares/validators.js';
 import { v4 as uuid } from 'uuid';
 import Cart from '../models/cart.js';
-
 const router = Router();
+
+// GET all carts
+router.get('/', async (req, res, next) => {
+  try {
+    const carts = await Cart.find();
+    res.json({ success: true, carts });
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.get('/:cartId', async (req, res, next) => {
 	try {
@@ -17,8 +26,12 @@ router.get('/:cartId', async (req, res, next) => {
 				.status(404)
 				.json({ success: false, message: 'Cart not found' });
 		}
+         
+		/* Calculate total price of the cart */ 
+		const totalPrice = cart.items.reduce((sum, item) => sum + item.price *item.qty, 0);
 
-		res.json({ success: true, cart });
+
+		res.json({ success: true, cart: { cartId: cart.cartId, items: cart.items }, total: totalPrice });
 	} catch (err) {
 		next(err);
 	}
@@ -55,10 +68,6 @@ router.put('/', validatePutProductBody, async (req, res, next) => {
 			qty: qty,
 		});
 
-		if (!result) {
-			result = 'Your cart is empty and deleted';
-		}
-
 		res.json({
 			success: true,
 			cart: result,
@@ -66,6 +75,39 @@ router.put('/', validatePutProductBody, async (req, res, next) => {
 		});
 	} catch (error) {
 		next(error);
+	}
+});
+
+// Ta bort en produkt ur kundvagnen
+router.put(`/:cartId/item/:prodId/decrease`, async (req, res, next) => {
+	const { cartId, prodId } = req.params;
+
+	try {
+		const cart = await getCartById(cartId);
+
+		if (!cart) {
+			const error = new Error(`Cart not found`);
+			error.status = 404;
+			return next(error);
+		}
+
+		const item = cart.items.find((i) => i.prodId === prodId);
+		if (!item) {
+			const error = new Error(`Product not found in cart`);
+			error.status = 404;
+			return next(error);
+		}
+
+		item.qty -= 1;
+
+		if (item.qty <= 0) {
+			cart.items = cart.items.filter((i) => i.prodId !== prodId);
+		}
+
+		await cart.save();
+		res.status(200).json(cart);
+	} catch (err) {
+		next(err);
 	}
 });
 
