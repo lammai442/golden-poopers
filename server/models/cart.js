@@ -7,6 +7,7 @@ const cartItemSchema = new Schema({
 	title: String,
 	price: Number,
 	qty: Number,
+	total: String,
 });
 
 const cartSchema = new Schema(

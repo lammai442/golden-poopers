@@ -4,8 +4,17 @@ import { getProductFromMenu } from '../services/products.js';
 import { validatePutProductBody } from '../middlewares/validators.js';
 import { v4 as uuid } from 'uuid';
 import Cart from '../models/cart.js';
-
 const router = Router();
+
+// GET all carts
+router.get('/', async (req, res, next) => {
+  try {
+    const carts = await Cart.find();
+    res.json({ success: true, carts });
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.get('/:cartId', async (req, res, next) => {
 	try {
@@ -17,8 +26,12 @@ router.get('/:cartId', async (req, res, next) => {
 				.status(404)
 				.json({ success: false, message: 'Cart not found' });
 		}
+         
+		/* Calculate total price of the cart */ 
+		const totalPrice = cart.items.reduce((sum, item) => sum + item.price *item.qty, 0);
 
-		res.json({ success: true, cart });
+
+		res.json({ success: true, cart: { cartId: cart.cartId, items: cart.items }, total: totalPrice });
 	} catch (err) {
 		next(err);
 	}
@@ -54,10 +67,6 @@ router.put('/', validatePutProductBody, async (req, res, next) => {
 			price: product.price,
 			qty: qty,
 		});
-
-		if (!result) {
-			result = 'Your cart is empty and deleted';
-		}
 
 		res.json({
 			success: true,
