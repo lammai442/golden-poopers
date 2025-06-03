@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import User from '../models/user.js';
-import { doesUsernameExists } from '../services/users.js';
+import { findUser } from '../services/users.js';
 import { validateAuthBody } from '../middlewares/validators.js';
 
 const router = Router();
@@ -43,7 +43,7 @@ router.post('/register', async (req, res, next) => {
 // GET - Login
 router.get('/login', validateAuthBody, async (req, res, next) => {
 	try {
-		const user = await doesUsernameExists(req.body.username);
+		const user = await findUser(req.body.username);
 		if (!user)
 			return next({
 				status: 400,

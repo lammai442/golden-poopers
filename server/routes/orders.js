@@ -4,6 +4,7 @@ import {
 	getAllOrders,
 	getOrdersByUserId,
 } from '../services/orders.js';
+import { generateDeliveryTime } from '../utils/index.js';
 
 const router = Router();
 
@@ -54,7 +55,14 @@ router.post('/', async (req, res, next) => {
 				.json({ success: false, message: 'Cart not found' });
 		}
 
-		res.status(201).json({ success: true, order });
+		const totalQty = order.orders.reduce((sum, item) => sum + item.qty, 0);
+		const deliveryTime = generateDeliveryTime(totalQty) + ' min';
+
+		res.status(201).json({
+			success: true,
+			deliveryTime: deliveryTime,
+			order,
+		});
 	} catch (err) {
 		next(err);
 	}
