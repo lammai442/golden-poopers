@@ -13,8 +13,17 @@ export async function updateCart(userId, product) {
 				items: [],
 			});
 		}
-		console.log(product.prodId);
-		console.log(cart);
+
+		const productDiscountExists = await Campaign.findOne({
+			threeForOne: prodId,
+		});
+
+		const discountAmount = [];
+		if (productDiscountExists) {
+			discountAmount.push(
+				calculateThreeForTwo(product.price, qty, prodId)
+			);
+		}
 
 		const item = cart.items.find((i) => i.prodId === product.prodId);
 		if (item) {

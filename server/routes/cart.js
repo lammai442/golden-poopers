@@ -5,6 +5,7 @@ import { validatePutProductBody } from '../middlewares/validators.js';
 import { v4 as uuid } from 'uuid';
 import Cart from '../models/cart.js';
 import { calculateThreeForTwo } from '../utils/index.js';
+import Campaign from '../models/campaign.js';
 
 const router = Router();
 
@@ -90,14 +91,21 @@ router.put('/', validatePutProductBody, async (req, res, next) => {
 			qty: qty,
 		});
 
+		const productDiscountExists = await Campaign.findOne({
+			threeForOne: prodId,
+		});
+
 		const discountAmount = [];
-		discountAmount.push(calculateThreeForTwo(product.price, qty, prodId));
+		if (productDiscountExists) {
+			discountAmount.push(
+				calculateThreeForTwo(product.price, qty, prodId)
+			);
+		}
 
 		res.json({
 			success: true,
 			cart: result,
 			userId: userId,
-			discountAmount: discountAmount,
 		});
 	} catch (error) {
 		next(error);
