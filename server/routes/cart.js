@@ -4,16 +4,18 @@ import { getProductFromMenu } from '../services/products.js';
 import { validatePutProductBody } from '../middlewares/validators.js';
 import { v4 as uuid } from 'uuid';
 import Cart from '../models/cart.js';
+import { calculateThreeForTwo } from '../utils/index.js';
+
 const router = Router();
 
 // GET all carts
 router.get('/', async (req, res, next) => {
-  try {
-    const carts = await Cart.find();
-    res.json({ success: true, carts });
-  } catch (error) {
-    next(error);
-  }
+	try {
+		const carts = await Cart.find();
+		res.json({ success: true, carts });
+	} catch (error) {
+		next(error);
+	}
 });
 
 router.get('/:cartId', async (req, res, next) => {
@@ -26,12 +28,18 @@ router.get('/:cartId', async (req, res, next) => {
 				.status(404)
 				.json({ success: false, message: 'Cart not found' });
 		}
-         
-		/* Calculate total price of the cart */ 
-		const totalPrice = cart.items.reduce((sum, item) => sum + item.price *item.qty, 0);
 
+		/* Calculate total price of the cart */
+		const totalPrice = cart.items.reduce(
+			(sum, item) => sum + item.price * item.qty,
+			0
+		);
 
-		res.json({ success: true, cart: { cartId: cart.cartId, items: cart.items }, total: totalPrice });
+		res.json({
+			success: true,
+			cart: { cartId: cart.cartId, items: cart.items },
+			total: totalPrice,
+		});
 	} catch (err) {
 		next(err);
 	}
@@ -68,10 +76,14 @@ router.put('/', validatePutProductBody, async (req, res, next) => {
 			qty: qty,
 		});
 
+		const discountAmount = [];
+		discountAmount.push(calculateThreeForTwo(product.price, qty, prodId));
+
 		res.json({
 			success: true,
 			cart: result,
 			userId: userId,
+			discountAmount: discountAmount,
 		});
 	} catch (error) {
 		next(error);
