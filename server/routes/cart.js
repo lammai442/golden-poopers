@@ -6,15 +6,29 @@ import { v4 as uuid } from 'uuid';
 import Cart from '../models/cart.js';
 const router = Router();
 
-// GET all carts
+/* GET all carts */
 router.get('/', async (req, res, next) => {
   try {
     const carts = await Cart.find();
-    res.json({ success: true, carts });
+
+     /* Add total to all carts */
+    const cartsWithTotal = carts.map((cart) => {
+      const total = cart.items.reduce(
+        (sum, item) => sum + item.price * item.qty, 0
+      );
+      return {
+        cartId: cart.cartId,
+        items: cart.items,
+        total,
+      };
+    });
+
+    res.json({ success: true, carts: cartsWithTotal });
   } catch (error) {
     next(error);
   }
 });
+
 
 router.get('/:cartId', async (req, res, next) => {
 	try {
@@ -37,7 +51,7 @@ router.get('/:cartId', async (req, res, next) => {
 	}
 });
 
-// Lägg till en produkt i kundvagnen
+ /* Lägg till en produkt i kundvagnen */
 router.put('/', validatePutProductBody, async (req, res, next) => {
 	const { prodId, qty, guestId } = req.body;
 	try {
@@ -52,7 +66,7 @@ router.put('/', validatePutProductBody, async (req, res, next) => {
 
 		let userId;
 
-		// Kontroll för inloggad annars guestId
+		/* Kontroll för inloggad annars guestId */
 		if (global.user && global.user.userId) {
 			userId = global.user.userId;
 		} else if (guestId) {
