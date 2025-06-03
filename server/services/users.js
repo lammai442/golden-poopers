@@ -1,12 +1,11 @@
 import User from '../models/user.js';
 
-export async function doesUsernameExists(username) {
+export async function findUser(username) {
 	try {
 		const user = await User.findOne({ username: username });
-		if (user) return user;
-		else throw new Error('No user found');
+		return user;
 	} catch (error) {
-		console.log(error.message);
+		next(error);
 		return null;
 	}
 }

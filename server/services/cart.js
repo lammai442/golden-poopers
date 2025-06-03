@@ -13,6 +13,8 @@ export async function updateCart(userId, product) {
 				items: [],
 			});
 		}
+		console.log(product.prodId);
+		console.log(cart);
 
 		const item = cart.items.find((i) => i.prodId === product.prodId);
 		if (item) {
