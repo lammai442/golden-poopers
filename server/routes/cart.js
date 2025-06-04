@@ -4,31 +4,19 @@ import { getProductFromMenu } from '../services/products.js';
 import { validatePutProductBody } from '../middlewares/validators.js';
 import { v4 as uuid } from 'uuid';
 import Cart from '../models/cart.js';
+
 const router = Router();
 
-/* GET all carts */
+// GET alla carts
 router.get('/', async (req, res, next) => {
-  try {
-    const carts = await Cart.find();
+	try {
+		const carts = await Cart.find();
 
-     /* Add total to all carts */
-    const cartsWithTotal = carts.map((cart) => {
-      const total = cart.items.reduce(
-        (sum, item) => sum + item.price * item.qty, 0
-      );
-      return {
-        cartId: cart.cartId,
-        items: cart.items,
-        total,
-      };
-    });
-
-    res.json({ success: true, carts: cartsWithTotal });
-  } catch (error) {
-    next(error);
-  }
+		res.json({ success: true, carts: carts });
+	} catch (error) {
+		next(error);
+	}
 });
-
 
 router.get('/:cartId', async (req, res, next) => {
 	try {
@@ -40,18 +28,22 @@ router.get('/:cartId', async (req, res, next) => {
 				.status(404)
 				.json({ success: false, message: 'Cart not found' });
 		}
-         
-		/* Calculate total price of the cart */ 
-		const totalPrice = cart.items.reduce((sum, item) => sum + item.price *item.qty, 0);
 
-
-		res.json({ success: true, cart: { cartId: cart.cartId, items: cart.items }, total: totalPrice });
+		res.json({
+			success: true,
+			cart: {
+				cartId: cart.cartId,
+				items: cart.items,
+				discount: cart.discount,
+				total: cart.total,
+			},
+		});
 	} catch (err) {
 		next(err);
 	}
 });
 
- /* Lägg till en produkt i kundvagnen */
+// Lägg till en produkt i kundvagnen
 router.put('/', validatePutProductBody, async (req, res, next) => {
 	const { prodId, qty, guestId } = req.body;
 	try {
@@ -66,7 +58,7 @@ router.put('/', validatePutProductBody, async (req, res, next) => {
 
 		let userId;
 
-		/* Kontroll för inloggad annars guestId */
+		// Kontroll för inloggad annars guestId
 		if (global.user && global.user.userId) {
 			userId = global.user.userId;
 		} else if (guestId) {
@@ -84,7 +76,14 @@ router.put('/', validatePutProductBody, async (req, res, next) => {
 
 		res.json({
 			success: true,
-			cart: result,
+			cart: {
+				cartId: result.cartId,
+				items: result.items,
+				total: result.total,
+				discount: result.discount,
+				createdAt: result.createdAt,
+				updatedAt: result.updatedAt,
+			},
 			userId: userId,
 		});
 	} catch (error) {

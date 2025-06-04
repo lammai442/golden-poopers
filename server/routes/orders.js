@@ -8,7 +8,7 @@ import { generateDeliveryTime } from '../utils/index.js';
 
 const router = Router();
 
-// Get all orders
+// GET alla orders
 router.get('/', async (req, res, next) => {
 	try {
 		const orders = await getAllOrders();
@@ -18,7 +18,7 @@ router.get('/', async (req, res, next) => {
 	}
 });
 
-// Get orders by userId
+// GET orders by userId
 router.get('/:userId', async (req, res, next) => {
 	try {
 		const { userId } = req.params;
@@ -37,7 +37,7 @@ router.get('/:userId', async (req, res, next) => {
 	}
 });
 
-// Create order from cartId
+// Skapa order från cartId
 router.post('/', async (req, res, next) => {
 	try {
 		const { cartId } = req.body;
@@ -54,14 +54,18 @@ router.post('/', async (req, res, next) => {
 				.status(404)
 				.json({ success: false, message: 'Cart not found' });
 		}
+		const lastOrder = order.orders[order.orders.length - 1];
 
-		const totalQty = order.orders.reduce((sum, item) => sum + item.qty, 0);
+		const totalQty = lastOrder.items.reduce(
+			(sum, item) => sum + item.qty,
+			0
+		);
 		const deliveryTime = generateDeliveryTime(totalQty) + ' min';
 
 		res.status(201).json({
 			success: true,
 			deliveryTime: deliveryTime,
-			order,
+			order: lastOrder,
 		});
 	} catch (err) {
 		next(err);

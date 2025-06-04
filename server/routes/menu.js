@@ -3,7 +3,7 @@ import Menu from '../models/menus.js';
 
 const router = Router();
 
-// GET all menu
+// GET alla menus
 router.get('/', async (req, res, next) => {
 	try {
 		const menus = await Menu.find();

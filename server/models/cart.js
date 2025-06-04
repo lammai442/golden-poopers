@@ -7,7 +7,6 @@ const cartItemSchema = new Schema({
 	title: String,
 	price: Number,
 	qty: Number,
-	total: Number,
 });
 
 const cartSchema = new Schema(
@@ -16,6 +15,20 @@ const cartSchema = new Schema(
 			type: String,
 		},
 		items: [cartItemSchema],
+		total: {
+			type: Number,
+			required: true,
+		},
+		discount: {
+			usedPromo: {
+				type: [String],
+				default: [],
+			},
+			discountAmount: {
+				type: Number,
+				default: 0,
+			},
+		},
 	},
 	{ timestamps: true }
 );

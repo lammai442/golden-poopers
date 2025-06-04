@@ -1,7 +1,33 @@
 import Cart from '../models/cart.js';
+import Campaign from '../models/campaign.js';
+import { calculateTotalCart } from '../utils/index.js';
 
 export const getCartById = async (cartId) => {
-	return await Cart.findOne({ cartId });
+	return Cart.findOne({ cartId });
+};
+
+export const calculateDiscount = async (cart, product) => {
+	const productDiscountExists = await Campaign.findOne({
+		threeForTwo: {
+			$elemMatch: { promoCode: product.prodId },
+		},
+	});
+
+	// Kontroll om användaren redan använt promo
+	const hasUsedPromo = cart.discount.usedPromo.includes(product.prodId);
+
+	if (product.qty >= 3 && productDiscountExists && !hasUsedPromo) {
+		cart.discount.usedPromo.push(product.prodId);
+		cart.discount.discountAmount += product.price;
+	}
+	if ((product.qty < 3 || !productDiscountExists) && hasUsedPromo) {
+		cart.discount.usedPromo = cart.discount.usedPromo.filter(
+			(p) => p !== product.prodId
+		);
+		cart.discount.discountAmount -= product.price;
+	}
+
+	return cart;
 };
 
 export async function updateCart(userId, product) {
@@ -10,11 +36,14 @@ export async function updateCart(userId, product) {
 		if (!cart) {
 			cart = await Cart.create({
 				cartId: userId,
+				total: 0,
 				items: [],
+				discount: {
+					usedPromo: [],
+					discountAmount: 0,
+				},
 			});
 		}
-		console.log(product.prodId);
-		console.log(cart);
 
 		const item = cart.items.find((i) => i.prodId === product.prodId);
 		if (item) {
@@ -22,6 +51,10 @@ export async function updateCart(userId, product) {
 		} else {
 			cart.items.push(product);
 		}
+
+		cart.total = calculateTotalCart(cart);
+
+		await calculateDiscount(cart, product);
 
 		if (product.qty === 0) {
 			console.log('Radera!');
