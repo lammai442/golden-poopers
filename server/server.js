@@ -7,10 +7,11 @@ import menuRouter from './routes/menu.js';
 import authRouter from './routes/auth.js';
 import cartRouter from './routes/cart.js';
 import ordersRouter from './routes/orders.js';
+
 // Config
-dotenv.config(); // Gör så att man kommer åt allt i env-filen
+dotenv.config();
 const app = express();
-const PORT = process.env.PORT; // Istället för 8080 så refereras det till .env-filens PORT
+const PORT = process.env.PORT;
 global.user = null;
 
 mongoose.connect(process.env.CONNECTION_STRING);
@@ -23,10 +24,9 @@ app.use(logger);
 // Routes
 app.use('/api/cart', cartRouter);
 app.use('/api/auth', authRouter);
-// app.use('/api/keys');
-// app.use('/api/users');
 app.use('/api/menu', menuRouter);
 app.use('/api/orders', ordersRouter);
+
 // En lyssnare för t ex uppkoppling mot databasen
 database.on('error', (error) => console.log(error));
 database.once('connected', () => {

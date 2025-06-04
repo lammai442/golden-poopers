@@ -5,25 +5,16 @@ export async function createOrderFromCart(cartId) {
 	const cart = await Cart.findOne({ cartId });
 	if (!cart) return null;
 
-	const total = cart.items.reduce(
-		(sum, item) => sum + item.price * item.qty,
-		0
-	);
+	console.log(cart);
 
 	let existingOrder = await Order.findOne({ userId: cartId });
 
 	if (!existingOrder) {
-		console.log('Ny order');
+		console.log('Ny orderaccount');
 
 		const newOrder = new Order({
 			userId: cart.cartId,
-			orders: cart.items.map((item) => ({
-				prodId: item.prodId,
-				title: item.title,
-				price: item.price,
-				qty: item.qty,
-				total: total,
-			})),
+			orders: cart,
 		});
 
 		await newOrder.save();
@@ -31,16 +22,7 @@ export async function createOrderFromCart(cartId) {
 		return newOrder;
 	} else {
 		console.log('Lägger till ny order i befintlig användare');
-
-		cart.items.forEach((item) => {
-			existingOrder.orders.push({
-				prodId: item.prodId,
-				title: item.title,
-				price: item.price,
-				qty: item.qty,
-				total: total,
-			});
-		});
+		existingOrder.orders.push(cart);
 
 		await existingOrder.save();
 		await Cart.deleteOne({ cartId });
