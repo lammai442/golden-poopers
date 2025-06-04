@@ -17,5 +17,5 @@ Airbean API är ett grupprojekt där målet är att skapa ett komplett backend-A
 ## Gruppmedlemmar
 
 - Lam Mai
-- Tim Verlange
+- Tim Verlage
 - Robin Torp
